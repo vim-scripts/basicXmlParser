@@ -1,0 +1,107 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=4380
+
+Name: basicXmlParser.vim
+Version: 1.0
+
+Description: Plugin create object trees and get them or save them as xml, and to create object trees from a xml files. May be used as an object tree, the xml is the file format for load and save the object tree from and to a file. Serialization to xml is optional, the user is not required to load or to save to xml, the tree may be builded manually or programmatically. This plugin was created as a utility plugin to load and save configuration files. It may also be used to save and load datafiles. See the usage section on how to use the plugin.
+
+Author: Alexandre Viau (alexandreviau@gmail.com)
+
+Usage: 
+
+The following examples create, save to file and load from file the following xml tree: 
+
+<root>
+   <Marks>
+      <A>
+         C:\Usb\i_green\apps
+         <myLevel3>
+            myLevel3Value
+            <myLevel4>
+               myLevel4Value
+            </myLevel4>
+         </myLevel3>
+      </A>
+      <B>
+         C:\Users\User\Desktop\
+      </B>
+      <C>
+         C:\
+      </C>
+   </Marks>
+   <LastPath>
+      d:\
+   </LastPath>
+</root>
+
+
+" Create object trees and get them or save them as xml 
+
+" Root level
+let myRoot = g:Item.New()
+
+" First level
+cal myRoot.Add(g:Item.New2('LastPath', 'd:&#039))
+echo myRoot.LastPath.Value
+
+cal myRoot.Add(g:Item.New1('Marks'))
+echo myRoot.Marks.Value
+
+" Second level
+cal myRoot.Marks.Add(g:Item.New2('A', 'C:\Usb\i_green\apps'))
+cal myRoot.Marks.Add(g:Item.New2('B', 'C:\Users\User\Desktop'))
+cal myRoot.Marks.Add(g:Item.New2('C', 'C:&#039))
+echo myRoot.Marks.A.Value
+echo myRoot.Marks.B.Value
+echo myRoot.Marks.C.Value
+" Show how many items there is in the second level
+echo myRoot.Marks.Count()
+
+" Third level
+cal myRoot.Marks.A.Add(g:Item.New2('myLevel3', 'myLevel3Value'))
+echo myRoot.Marks.A.myLevel3.Value
+Show how many items there is in the third level
+echo myRoot.Marks.A.Count()
+
+" Fourth level
+cal myRoot.Marks.A.myLevel3.Add(g:Item.New2('myLevel4', 'myLevel4Value'))
+echo myRoot.Marks.A.myLevel3.myLevel4.Value
+
+" To get the xml as a list
+let myXmlList = myRoot.ToXmlList()
+echo myXmlList
+
+" To save the xml to a file
+cal myRoot.SaveToXml('c:/temp/cfg.xml')
+
+" Example to copy from third level to a new root
+let myRoot2 = myRoot.Marks.A.myLevel3
+" Display value from new root, now what was 4th level is now first level
+echo myRoot2.myLevel4.Value
+
+" Create object trees from a xml files 
+
+" Load the file created in the previous example
+let rootItem2 = g:Item.LoadFile('c:/temp/cfg.xml')
+
+" Show some elements from the loaded xml file
+echo rootItem2.LastPath.Value
+echo rootItem2.Marks.A.Value
+echo rootItem2.Marks.B.Value
+echo rootItem2.Marks.A.myLevel3.Value
+echo rootItem2.Marks.A.myLevel3.myLevel4.Value
+echo rootItem2.Marks.C.Value
+echo rootItem2.Marks.Value
+
+" Create object trees from expressions 
+
+" There is another way of creating the object trees using expressions, the "g:RootItem.LoadFile()" function is an example how to do this. By expressions, I mean that something like exe 'cal items.Items' . level . '.Add(g:Item.New("' . tag . '", ""))' may be used where the "level" variable would contain a string of the path to the items like for example "myItem1.Items.myItem2.Items".
+
+Todo: 
+1. Automatically put every tag and values each on his own line (it should be like this to be parsed correctly)
+2. Get multiline values inside tags
+
+History: 
+
+1.0 Initial release
+
